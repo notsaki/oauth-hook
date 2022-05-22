@@ -38,8 +38,11 @@ export function OAuthProvider(props: OAuthProps) {
 	};
 
 	const code = new URL(window.location.href).searchParams.get("code");
-	const code_challenge = useRef(randomString(128));
-	const state = useRef(randomString(80));
+	const code_challenge = useRef(sessionStorage.getItem("oauth-code-challenge") ?? randomString(128));
+	const state = useRef(sessionStorage.getItem("oauth-state") ?? randomString(80));
+
+	sessionStorage.setItem("oauth-code-challenge", code_challenge.current);
+	sessionStorage.setItem("oauth-state", state.current);
 
 	const [oAuthContext, authDispatcher] = useReducer<(state: OAuthState, action: OAuthStateActions) => OAuthState>(oauthReducer, {
 		token: null,
@@ -55,10 +58,10 @@ export function OAuthProvider(props: OAuthProps) {
 		const tokenParams = {
 			client_id: params.client_id,
 			grant_type: "authorization_code",
-			code_verifier: code_challenge,
+			code_verifier: code_challenge.current,
 			code,
 			redirect_uri: params.redirect_uri,
-			state,
+			state: state.current,
 		};
 
 		fetch(`${uri}/token`, {
@@ -94,8 +97,8 @@ export function OAuthProvider(props: OAuthProps) {
 	function authenticate() {
 		const urlParams = {
 			...params,
-			code_challenge,
-			state,
+			code_challenge: code_challenge.current,
+			state: state.current,
 		};
 
 		window.location.href = `${uri}/authorize?${paramsSerialiser(urlParams)}`;
@@ -105,10 +108,10 @@ export function OAuthProvider(props: OAuthProps) {
 		const tokenParams = {
 			client_id: params.client_id,
 			grant_type: "refresh_token",
-			code_verifier: code_challenge,
+			code_verifier: code_challenge.current,
 			refresh_token: oAuthContext.refresh_token,
 			redirect_uri: params.redirect_uri,
-			state,
+			state: state.current,
 		};
 
 		fetch(`${uri}/token`, {
