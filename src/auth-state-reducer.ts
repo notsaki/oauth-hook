@@ -11,7 +11,7 @@ export type OAuthStateActions = {
 	type: "logout",
 };
 
-export function oauthReducer(state: OAuthState, action: OAuthStateActions) {
+export function oAuthReducer(state: OAuthState, action: OAuthStateActions) {
 	switch(action.type) {
 		case "authenticate":
 			return {

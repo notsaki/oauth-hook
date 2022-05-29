@@ -1,9 +1,10 @@
 import {useReducer} from "react";
-import {Token} from "./token.entity";
+import {Token} from "./entities/token.entity";
 import newContext from "./new-context";
 import {randomString} from "./utils/random-string";
 import {paramsSerialiser} from "./utils/params-serialiser";
-import {oauthReducer, OAuthStateActions} from "./auth-state-reducer";
+import {oAuthReducer, OAuthStateActions} from "./auth-state-reducer";
+import {sessionStorageRepository} from "./session-storage.repository";
 
 interface OAuthProps {
 	children: JSX.Element | JSX.Element[];
@@ -47,7 +48,7 @@ export function OAuthProvider(props: OAuthProps) {
 		response_mode: "query",
 	};
 
-	const [oAuthContext, authDispatcher] = useReducer<(state: OAuthState, action: OAuthStateActions) => OAuthState>(oauthReducer, {
+	const [oAuthContext, authDispatcher] = useReducer<(state: OAuthState, action: OAuthStateActions) => OAuthState>(oAuthReducer, {
 		token: tokenInitialState ? tokenInitialState.token : null,
 		refresh_token: tokenInitialState ? tokenInitialState.refresh_token : null,
 		expire: tokenInitialState ? tokenInitialState.expire : null,
@@ -59,15 +60,15 @@ export function OAuthProvider(props: OAuthProps) {
 	// Load data from session storage only if session or code on url exists. Otherwise, user has to re-authenticate, so we
 	// need a new code challenge and state.
 	const code_challenge = oAuthContext.token || code
-		? sessionStorage.getItem("oauth-code-challenge") ?? randomString(128)
+		? sessionStorageRepository.getItem("oauth-code-challenge") ?? randomString(128)
 		: randomString(128);
 
 	const state = oAuthContext.token || code
-		? sessionStorage.getItem("oauth-state") ?? randomString(80)
+		? sessionStorageRepository.getItem("oauth-state") ?? randomString(80)
 		: randomString(80);
 
-	sessionStorage.setItem("oauth-code-challenge", code_challenge);
-	sessionStorage.setItem("oauth-state", state);
+	sessionStorageRepository.setItem("oauth-code-challenge", code_challenge);
+	sessionStorageRepository.setItem("oauth-state", state);
 
 	if (code && !(oAuthContext.token && oAuthContext.refresh_token && oAuthContext.expire)) {
 		const tokenParams = {

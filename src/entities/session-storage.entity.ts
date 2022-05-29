@@ -1,0 +1,1 @@
+export type SessionStorageKey = "oauth-code-challenge" | "oauth-state";
