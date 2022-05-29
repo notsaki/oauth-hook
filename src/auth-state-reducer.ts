@@ -1,4 +1,4 @@
-import { OAuthState } from "./OAuthProvider";
+import {OAuthState} from "./useOAuth";
 
 export type OAuthStateActions = {
 	type: "authenticate",

@@ -1,7 +1,6 @@
-import { OAuthProvider } from "./OAuthProvider";
-import { useOAuthContext } from "./oauth-context";
+import { OAuthProvider, useOAuth } from "./useOAuth";
 
-export default {
+export {
 	OAuthProvider,
-	useOAuthContext,
+	useOAuth,
 };
